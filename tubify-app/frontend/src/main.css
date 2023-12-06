@@ -1,0 +1,19 @@
+.App {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+  
+footer {
+    margin-top: auto; /* Push footer to the bottom */
+  }
+  
+.custom-padding {
+    padding-left: 15px; /* Or any other value */
+    padding-right: 15px; /* Or any other value */
+  }
+
+
+.flex-grow-1 {
+    flex-grow: 1;
+}
