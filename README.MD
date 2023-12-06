@@ -79,4 +79,4 @@ Foreign-key constraints:
 The database is BCNF. 
 
 ### Saved database
-`pg_dump -d Tubify -F p -f Tubify.dump`
+The database is saved in the file `newTubify.dump` using the cmd `pg_dump -d Tubify -F p -f Tubify.dump`
