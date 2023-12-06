@@ -1,7 +1,7 @@
 import {React, useState} from 'react';
 import { Row, Col, Form, Button } from 'react-bootstrap';
 
-const MainDropDown = ({ artists, settings, onSubmit }) => {
+const SettingDropDown = ({ artists, settings, onSubmit }) => {
   const [selectedArtist, setSelectedArtist] = useState('');
   const [selectedSetting, setSelectedSetting] = useState('');
 
@@ -46,4 +46,4 @@ const MainDropDown = ({ artists, settings, onSubmit }) => {
   );
 };
 
-export default MainDropDown;
+export default SettingDropDown;

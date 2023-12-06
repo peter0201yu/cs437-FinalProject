@@ -3,6 +3,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import psycopg2
 import os
+import random
 
 load_dotenv()
 # PostgreSQL Database credentials loaded from the .env file
@@ -79,8 +80,8 @@ try:
         return jsonify(genre_list)
 
     # GET: Fetch search songs from MAIN
-    @app.route('/search')
-    def search():
+    @app.route('/search-by-artist-setting')
+    def search_by_artist_setting():
         artist = request.args.get('artist')
         setting = request.args.get('setting')
 
@@ -109,5 +110,75 @@ try:
         results = [j for results in results for j in results]
         return results
 
-except:
-    print('Error')
+    # GET genre + songs by popularity
+    @app.route('/search-by-genre-popularity')
+    def search_by_genre_popularity():
+        genre = request.args.get('genre')
+        popularity = request.args.get('popularity')
+
+        popularity_ranges = {
+            'Hits': (70, 99),
+            'Mainstream': (60, 70),
+            'Hidden Gem': (40, 60)
+        }
+
+        base_query = """
+        SELECT url FROM songs
+        JOIN genres ON songs.genre_id = genres.genre_id
+        """
+        conditions = []
+        params = []
+
+        # Handle popularity
+        if popularity:
+            pop_range = popularity_ranges.get(popularity)
+            if not pop_range:
+                return jsonify({"error": "Invalid popularity range"}), 400
+            conditions.append("popularity >= %s AND popularity <= %s")
+            params.extend([pop_range[0], pop_range[1]])
+
+        # Handle genre
+        if genre:
+            conditions.append("genres.genre_id = %s")
+            params.append(genre)
+
+        # Append conditions to the base query if they exist
+        if conditions:
+            base_query += " WHERE " + " AND ".join(conditions)
+
+        cur.execute(base_query, params)
+        results = cur.fetchall()
+        results = [url for results in results for url in results]
+        return jsonify(results)
+
+    # GET song by mood
+    @app.route('/search-by-mood')
+    def search_by_mood():
+        mood = request.args.get('mood').lower()
+        params = []
+        params.append(mood)
+
+        mood_query = """
+        SELECT genre_id FROM moodtogenres m 
+        JOIN moods mo ON m.mood_id = mo.mood_id
+        WHERE mo.mood_name = %s
+        """
+        cur.execute(mood_query, params)
+        genre_res = cur.fetchall()
+        genre_res = [genre for genre_res in genre_res for genre in genre_res]
+        genre = random.choice(genre_res)
+
+        new_params = []
+        new_params.append(genre)
+
+        song_query = """
+        SELECT url FROM songs WHERE genre_id = %s
+        """
+        cur.execute(song_query, new_params)
+        results = cur.fetchall()
+        results = [url for results in results for url in results]
+        return results
+        
+except Exception as e:
+    print (jsonify({"error": str(e)}))
+    
